@@ -1,15 +1,21 @@
 import { Alert, FlatList, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { Participant } from "../../components/Participant";
 import { styles } from "./styles";
+import { useState } from "react";
 
 export function Home() {
-  const participants = ['Bruno1', 'Bruno2', 'Bruno3', 'Bruno4', 'Bruno5', 'Bruno6', 'Bruno7', 'Bruno8',];
+  const [participants, setParticipants] = useState<string[]>([]);
+  const [participantName, setParticipantName] = useState('');
+  const buttonDisable = participantName.length === 0;
 
   function handleParticipantAdd() {
-    if (participants.includes('Bruno1')) {
-      Alert.alert("Participante existe", "Já existe um participante na lista com esse nome");
-      return;
+
+    if (participants.includes(participantName)) {
+      return Alert.alert('Participante existe', 'Já existe um participante na lista com esse nome')
     }
+
+    setParticipants(prevState => [...prevState, participantName])
+    setParticipantName('');
   }
 
   function handleParticipantRemove(name: string) {
@@ -18,7 +24,11 @@ export function Home() {
       'Remover',
       `Remover o participante ${name}?`,
       [
-        { text: 'Sim', onPress: () => Alert.alert('Deletado') },
+        {
+          text: 'Sim', onPress: () => {
+            setParticipants(prevState => prevState.filter(p => p !== name))
+          }
+        },
         { text: 'Não', style: 'cancel' }
       ]
     );
@@ -26,6 +36,7 @@ export function Home() {
 
   return (
     <View style={styles.container}>
+
       <Text style={styles.eventName}>
         Nome do evento
       </Text>
@@ -39,10 +50,13 @@ export function Home() {
           style={styles.input}
           placeholder="Nome do participante"
           placeholderTextColor="#6B6B6B"
+          onChangeText={setParticipantName}
+          value={participantName}
         />
         <TouchableOpacity
-          style={styles.button}
+          style={{...styles.button, opacity: buttonDisable ? 0.4 : 1}}
           onPress={handleParticipantAdd}
+          disabled={buttonDisable}
         >
           <Text style={styles.buttonText}>+</Text>
         </TouchableOpacity>
@@ -64,8 +78,6 @@ export function Home() {
           <Text style={styles.listEmptyText}>Ninguém chegou no evento ainda? Adicione participantes a sua lista de presença</Text>
         )}
       />
-
-
     </View>
   );
 }
